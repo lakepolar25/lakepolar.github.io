@@ -1,49 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Roblox Game Developer Products</title>
+    <title>Roblox Developer Products</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            margin-top: 50px; 
-            background-color: #121212; 
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #121212;
             color: #ffffff;
+            margin: 0;
+            padding: 0;
         }
-        button { 
-            padding: 10px 20px; 
-            cursor: pointer; 
-            background-color: #333; 
-            color: #ffffff; 
-            border: none; 
-            border-radius: 5px;
-            margin: 10px;
+        .header {
+            padding: 20px;
+            background: #2a2a2a;
+            font-size: 24px;
+            font-weight: bold;
+            border-bottom: 2px solid #444;
         }
-        button:hover {
-            background-color: #555;
+        .container {
+            margin: 40px auto;
+            max-width: 800px;
         }
-        #output { margin-top: 20px; }
-        a.button-link {
+        .button {
             display: inline-block;
-            margin: 10px;
-            padding: 10px 20px;
-            background-color: #1e1e1e;
-            color: #ffffff;
+            padding: 15px 30px;
+            margin: 20px;
+            border-radius: 10px;
+            background: #ff8c42;
+            color: #121212;
+            font-weight: bold;
             text-decoration: none;
-            border-radius: 5px;
+            transition: background 0.3s;
         }
-        a.button-link:hover {
-            background-color: #333;
+        .button:hover {
+            background: #ff6f20;
+        }
+        .footer {
+            margin-top: 50px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-top: 2px solid #444;
+        }
+        .product-card {
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            background: #1e1e1e;
+        }
+        .special-thanks {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .thanks-badge {
+            padding: 10px 20px;
+            border-radius: 20px;
+            background: #ff8c42;
+            color: #121212;
         }
     </style>
 </head>
 <body>
-    <h1>Roblox Game Developer Products</h1>
 
-    <button onclick="fetchDevProducts(3317771874)">Show Products for 3317771874</button>
-    <button onclick="fetchDevProducts(6401952734)">Show Products for 6401952734</button>
+    <div class="header">Roblox Developer Products Viewer</div>
 
-    <div id="output"></div>
+    <div class="container">
+        <a class="button" onclick="fetchDevProducts(3317771874)">Show Products for Universe 3317771874</a>
+        <a class="button" onclick="fetchDevProducts(6401952734)">Show Products for Universe 6401952734</a>
+
+        <div id="output"></div>
+    </div>
+
+    <div class="footer">
+        <div>Created with ❤️ by Lake</div>
+        <div class="special-thanks">
+            <span class="thanks-badge">My Friends</span>
+        </div>
+    </div>
 
     <script>
         async function fetchDevProducts(universeId) {
@@ -66,13 +102,12 @@
 
                 data.forEach(product => {
                     output.innerHTML += `
-                        <p>
+                        <div class="product-card">
                             🛒 <strong>${product.Name}</strong><br>
                             💰 Price: ${product.PriceInRobux} Robux<br>
                             🔗 ID: ${product.ProductId}<br>
-                            <a class="button-link" href="https://www.roblox.com/library/${product.ProductId}" target="_blank">View Asset</a>
-                        </p>
-                        <hr>
+                            <a class="button" href="https://www.roblox.com/library/${product.ProductId}" target="_blank">View Asset</a>
+                        </div>
                     `;
                 });
 
@@ -82,5 +117,6 @@
             }
         }
     </script>
+
 </body>
 </html>
