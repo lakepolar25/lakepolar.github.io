@@ -36,7 +36,7 @@
     <div id="output">Select a game to view its developer products.</div>
 
     <script>
-        const proxyUrl = "https://your-worker-id.workers.dev"; // Replace with your Cloudflare Worker URL
+        const proxyUrl = "https://mskswokcev.devrahsanko.workers.dev/"; // Replace with your Cloudflare Worker URL
 
         async function fetchProducts(universeId) {
             const output = document.getElementById('output');
