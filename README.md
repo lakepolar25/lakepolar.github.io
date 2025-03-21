@@ -11,14 +11,12 @@
             text-align: center;
             margin: 20px;
         }
-
         button {
             margin: 10px;
             padding: 10px 20px;
             font-size: 16px;
             cursor: pointer;
         }
-
         #output {
             margin-top: 20px;
             white-space: pre-wrap;
@@ -36,21 +34,19 @@
     <div id="output">Select a game to view its developer products.</div>
 
     <script>
+        const proxyUrl = "https://mskswokcev.devrahsanko.workers.dev";
+
         async function fetchProducts(universeId) {
             const output = document.getElementById('output');
             output.textContent = 'Loading developer products...';
 
-            // Use the public proxy to bypass CORS
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://apis.roblox.com/developer-products/v1/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000`)}`;
-
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(`${proxyUrl}?universeId=${universeId}`);
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: Failed to fetch data`);
                 }
 
-                const { contents } = await response.json();
-                const data = JSON.parse(contents);
+                const data = await response.json();
 
                 if (!Array.isArray(data) || data.length === 0) {
                     output.textContent = 'No developer products found.';
@@ -61,10 +57,9 @@
                 data.forEach(product => {
                     output.innerHTML += `
                         <p>
-                            <strong>Name:</strong> ${product.name}<br>
-                            <strong>Price:</strong> ${product.priceInRobux} Robux<br>
-                            <strong>ID:</strong> ${product.id}<br>
-                            ${product.iconImageAssetId ? `<img src="https://www.roblox.com/asset-thumbnail/image?assetId=${product.iconImageAssetId}&width=150&height=150" alt="Product Icon">` : ""}
+                            <strong>Name:</strong> ${product.name || "Unknown"}<br>
+                            <strong>Price:</strong> ${product.priceInRobux || "0"} Robux<br>
+                            <strong>ID:</strong> ${product.id || "Unknown"}
                         </p>
                         <hr>
                     `;
@@ -77,5 +72,4 @@
     </script>
 
 </body>
-
 </html>
