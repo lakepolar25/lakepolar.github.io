@@ -36,19 +36,21 @@
     <div id="output">Select a game to view its developer products.</div>
 
     <script>
-        const proxyUrl = "https://mskswokcev.devrahsanko.workers.dev/"; // Replace with your Cloudflare Worker URL
-
         async function fetchProducts(universeId) {
             const output = document.getElementById('output');
             output.textContent = 'Loading developer products...';
 
+            // Use the public proxy to bypass CORS
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://apis.roblox.com/developer-products/v1/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000`)}`;
+
             try {
-                const response = await fetch(`${proxyUrl}?universeId=${universeId}`);
+                const response = await fetch(proxyUrl);
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: Failed to fetch data`);
                 }
 
-                const data = await response.json();
+                const { contents } = await response.json();
+                const data = JSON.parse(contents);
 
                 if (!Array.isArray(data) || data.length === 0) {
                     output.textContent = 'No developer products found.';
