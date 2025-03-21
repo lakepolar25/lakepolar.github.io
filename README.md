@@ -36,14 +36,14 @@
     <div id="output">Select a game to view its developer products.</div>
 
     <script>
+        const proxyUrl = "https://your-worker-id.workers.dev"; // Replace with your Cloudflare Worker URL
+
         async function fetchProducts(universeId) {
             const output = document.getElementById('output');
             output.textContent = 'Loading developer products...';
 
-            const apiUrl = `https://apis.roblox.com/developer-products/v1/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000`;
-
             try {
-                const response = await fetch(apiUrl);
+                const response = await fetch(`${proxyUrl}?universeId=${universeId}`);
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: Failed to fetch data`);
                 }
