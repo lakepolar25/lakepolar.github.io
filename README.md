@@ -1,122 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Roblox Developer Products</title>
+    <title>BIG Games DevProduct Scanner</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             text-align: center;
-            background-color: #121212;
-            color: #ffffff;
-            margin: 0;
-            padding: 0;
         }
-        .header {
-            padding: 20px;
-            background: #2a2a2a;
-            font-size: 24px;
-            font-weight: bold;
-            border-bottom: 2px solid #444;
-        }
-        .container {
-            margin: 40px auto;
-            max-width: 800px;
-        }
-        .button {
-            display: inline-block;
-            padding: 15px 30px;
-            margin: 20px;
-            border-radius: 10px;
-            background: #ff8c42;
-            color: #121212;
-            font-weight: bold;
-            text-decoration: none;
-            transition: background 0.3s;
-        }
-        .button:hover {
-            background: #ff6f20;
-        }
-        .footer {
-            margin-top: 50px;
-            padding: 20px;
-            background: #2a2a2a;
-            border-top: 2px solid #444;
-        }
-        .product-card {
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
-            background: #1e1e1e;
-        }
-        .special-thanks {
+        .product-container {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 20px;
             margin-top: 20px;
         }
-        .thanks-badge {
-            padding: 10px 20px;
-            border-radius: 20px;
-            background: #ff8c42;
-            color: #121212;
+        .product {
+            border: 2px solid black;
+            padding: 10px;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
+    <h1>BIG Games DevProduct Scanner</h1>
+    <button onclick="fetchDevProducts(3317771874)">Show Products for 3317771874</button>
+    <button onclick="fetchDevProducts(6401952734)">Show Products for 6401952734</button>
 
-    <div class="header">Roblox Developer Products Viewer</div>
-
-    <div class="container">
-        <a class="button" onclick="fetchDevProducts(3317771874)">Show Products for Universe 3317771874</a>
-        <a class="button" onclick="fetchDevProducts(6401952734)">Show Products for Universe 6401952734</a>
-
-        <div id="output"></div>
-    </div>
-
-    <div class="footer">
-        <div>Created with ❤️ by Lake</div>
-        <div class="special-thanks">
-            <span class="thanks-badge">My Friends</span>
-        </div>
-    </div>
+    <div id="product-list" class="product-container"></div>
 
     <script>
         async function fetchDevProducts(universeId) {
-            const output = document.getElementById('output');
-
-            output.innerHTML = `Fetching Developer Products for Universe ${universeId}...`;
+            const productList = document.getElementById('product-list');
+            productList.innerHTML = '<p>Loading...</p>';
 
             try {
-                const response = await fetch(`https://apis.roblox.com/developer-products/v1/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000`);
-                if (!response.ok) throw new Error("Failed to fetch");
+                const response = await fetch(`https://apis.roblox.com/developer-products/v1/universes/${universeId}/products`);
+                if (!response.ok) throw new Error(`Error ${response.status}: Failed to fetch data.`);
 
                 const data = await response.json();
+                productList.innerHTML = '';
 
                 if (data.length === 0) {
-                    output.innerHTML = "No Developer Products found.";
+                    productList.innerHTML = '<p>No developer products found.</p>';
                     return;
                 }
 
-                output.innerHTML = `<h2>Developer Products for Universe ${universeId}:</h2>`;
-
                 data.forEach(product => {
-                    output.innerHTML += `
-                        <div class="product-card">
-                            🛒 <strong>${product.Name}</strong><br>
-                            💰 Price: ${product.PriceInRobux} Robux<br>
-                            🔗 ID: ${product.ProductId}<br>
-                            <a class="button" href="https://www.roblox.com/library/${product.ProductId}" target="_blank">View Asset</a>
-                        </div>
-                    `;
+                    const productDiv = document.createElement('div');
+                    productDiv.className = 'product';
+                    productDiv.innerHTML = `<strong>${product.Name}</strong><br>ID: ${product.ProductId}`;
+                    productList.appendChild(productDiv);
                 });
 
             } catch (error) {
-                output.innerHTML = "Error fetching Developer Products.";
-                console.error(error);
+                productList.innerHTML = `<p>Error: ${error.message}</p>`;
             }
         }
     </script>
-
 </body>
 </html>
