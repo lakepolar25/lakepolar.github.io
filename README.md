@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <title>BIG Games DevProduct Scanner</title>
     <meta charset="UTF-8">
@@ -21,10 +20,12 @@
             margin-top: 20px;
             white-space: pre-wrap;
             text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
     </style>
 </head>
-
 <body>
     <h1>BIG Games DevProduct Scanner</h1>
 
@@ -34,6 +35,7 @@
     <div id="output">Select a game to view its developer products.</div>
 
     <script>
+        // Replace with your Cloudflare Worker URL
         const proxyUrl = "https://mskswokcev.devrahsanko.workers.dev";
 
         async function fetchProducts(universeId) {
@@ -42,6 +44,7 @@
 
             try {
                 const response = await fetch(`${proxyUrl}?universeId=${universeId}`);
+                
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: Failed to fetch data`);
                 }
@@ -57,9 +60,9 @@
                 data.forEach(product => {
                     output.innerHTML += `
                         <p>
-                            <strong>Name:</strong> ${product.name || "Unknown"}<br>
-                            <strong>Price:</strong> ${product.priceInRobux || "0"} Robux<br>
-                            <strong>ID:</strong> ${product.id || "Unknown"}
+                            <strong>Name:</strong> ${product.name}<br>
+                            <strong>Price:</strong> ${product.priceInRobux} Robux<br>
+                            <strong>ID:</strong> ${product.id}
                         </p>
                         <hr>
                     `;
@@ -70,6 +73,5 @@
             }
         }
     </script>
-
 </body>
 </html>
