@@ -76,7 +76,7 @@
         return;
       }
 
-      const workerUrl = 'https://https://mskswokcev.devrahsanko.workers.dev/?groupId=' + groupId;
+      const workerUrl = 'https://mskswokcev.devrahsanko.workers.dev/?groupId=' + groupId;
 
       try {
         const response = await fetch(workerUrl);
