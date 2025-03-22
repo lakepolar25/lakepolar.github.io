@@ -91,7 +91,7 @@
             gameList.innerHTML = "";
 
             try {
-                const response = await fetch(`https://mskswokcev.devrahsanko.workers.dev?groupId=${groupId}`);
+                const response = await fetch(`https://your-cloudflare-worker-url.workers.dev/?groupId=${groupId}`);
                 if (!response.ok) throw new Error("Failed to fetch games.");
 
                 const games = await response.json();
@@ -108,10 +108,6 @@
                     card.className = "game-card";
                     card.innerHTML = `
                         <h3>${game.name}</h3>
-                        <p><strong>Description:</strong> ${game.description || "No description available."}</p>
-                        <p><strong>Visits:</strong> ${game.visits.toLocaleString()}</p>
-                        <p><strong>Status:</strong> ${game.status || "Unknown"}</p>
-                        <p><strong>Creation Date:</strong> ${new Date(game.created).toLocaleDateString()}</p>
                         <a href="https://www.roblox.com/games/${game.placeId}" target="_blank">Play Game</a>
                     `;
                     gameList.appendChild(card);
