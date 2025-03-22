@@ -1,110 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roblox Group Game Viewer</title>
   <style>
     body {
-      background-color: #121212;
+      background: #121212;
       color: white;
       font-family: Arial, sans-serif;
       text-align: center;
       padding: 20px;
     }
-    h1 {
-      font-size: 2em;
-    }
     input {
       padding: 10px;
       border-radius: 5px;
-      border: none;
-      margin: 10px;
+      margin-bottom: 10px;
     }
     button {
       padding: 10px 20px;
-      margin: 10px;
       border: none;
       border-radius: 5px;
-      background-color: #8a2be2; /* Purple */
+      background: purple;
       color: white;
       cursor: pointer;
-      font-weight: bold;
+      margin: 5px;
     }
-    button:hover {
-      background-color: #6a1bbd;
+    .game-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
     }
     .game-card {
-      border: 1px solid #444;
-      border-radius: 8px;
-      margin: 10px;
-      padding: 15px;
-      display: inline-block;
-      width: 250px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 10px;
+      width: 200px;
+    }
+    img {
+      border-radius: 10px;
+      width: 150px;
+      height: 150px;
     }
     .footer {
-      margin-top: 20px;
-      font-size: 0.9em;
+      margin-top: 40px;
       opacity: 0.8;
     }
   </style>
 </head>
 <body>
   <h1>Roblox Group Game Viewer</h1>
+  <input id="groupId" type="number" placeholder="Enter Group ID" />
+  <button onclick="fetchGames()">Fetch Games</button>
 
-  <input type="text" id="groupId" placeholder="Enter Roblox Group ID" />
-  <button onclick="fetchGames()">View Games</button>
-
-  <div id="gameContainer"></div>
+  <div id="gameContainer" class="game-container"></div>
 
   <div class="footer">
-    <p>This site is not made or affiliated with Roblox Corporation.<br> This site is made to view games from a Roblox group.</p>
-    <a href="#" style="text-decoration: none; color: white;">
-      <button>Discord</button>
-    </a>
-    <a href="#" style="text-decoration: none; color: white;">
-      <button>Twitter</button>
-    </a>
+    <p>This site is not made or affiliated with Roblox Corporation. It is for viewing Roblox group games.</p>
+    <button onclick="window.open('https://discord.com', '_blank')">🎮 Discord</button>
+    <button onclick="window.open('https://twitter.com', '_blank')">🦜 Twitter</button>
   </div>
 
   <script>
     async function fetchGames() {
       const groupId = document.getElementById('groupId').value;
-      if (!groupId) {
-        alert('Please enter a Roblox Group ID.');
-        return;
-      }
+      if (!groupId) return alert('Please enter a valid Group ID.');
 
-      const workerUrl = 'https://mskswokcev.devrahsanko.workers.dev/?groupId=' + groupId;
+      const gameContainer = document.getElementById('gameContainer');
+      gameContainer.innerHTML = 'Loading games...';
 
       try {
-        const response = await fetch(workerUrl);
+        const response = await fetch(`https://your-cloudflare-worker-url.workers.dev/?groupId=${groupId}`);
         const data = await response.json();
 
-        const gameContainer = document.getElementById('gameContainer');
-        gameContainer.innerHTML = '';
+        if (!data || !data.data || data.data.length === 0) {
+          gameContainer.innerHTML = 'No games found for this group.';
+          return;
+        }
 
-        if (data.data && data.data.length > 0) {
-          data.data.forEach(game => {
-            const gameCard = document.createElement('div');
-            gameCard.className = 'game-card';
-            gameCard.innerHTML = `
+        gameContainer.innerHTML = '';
+        for (const game of data.data) {
+          const iconResponse = await fetch(`https://thumbnails.roblox.com/v1/places/gameicons?placeIds=${game.rootPlaceId}&size=150x150&format=png`);
+          const iconData = await iconResponse.json();
+          const iconUrl = iconData.data?.[0]?.imageUrl || 'https://via.placeholder.com/150';
+
+          gameContainer.innerHTML += `
+            <div class="game-card">
+              <img src="${iconUrl}" alt="Game Icon">
               <h3>${game.name}</h3>
-              <img src="${game.thumbnailUrl || 'https://via.placeholder.com/150'}" alt="Game Thumbnail" width="200">
-              <p>Players: ${game.playing}</p>
-              <a href="https://www.roblox.com/games/${game.rootPlaceId}" target="_blank">
-                <button>Play Game</button>
-              </a>
-            `;
-            gameContainer.appendChild(gameCard);
-          });
-        } else {
-          gameContainer.innerHTML = '<p>No games found for this group.</p>';
+              <p>Players: ${game.playing || 0}</p>
+              <p>${game.description || 'No description available.'}</p>
+              <button onclick="window.open('https://www.roblox.com/games/${game.rootPlaceId}', '_blank')">Play Game</button>
+            </div>`;
         }
       } catch (error) {
         console.error('Error fetching games:', error);
-        document.getElementById('gameContainer').innerHTML = '<p>Error fetching games. Check the group ID and try again.</p>';
+        gameContainer.innerHTML = 'Error fetching games. Try again later.';
       }
     }
   </script>
