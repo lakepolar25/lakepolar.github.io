@@ -1,121 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
     <title>Roblox Group Game Viewer</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-
-        h1 {
-            color: #3b82f6;
-        }
-
-        input {
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            margin-right: 10px;
-        }
-
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #6b21a8;
-            color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #8b5cf6;
-        }
-
-        .footer {
-            margin-top: 20px;
-        }
-
-        .social-button {
-            margin: 10px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #6b21a8;
-            color: white;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .game-card {
-            border: 1px solid #6b21a8;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px auto;
-            max-width: 500px;
-            background-color: #1e1e1e;
-        }
+        body { font-family: Arial, sans-serif; background: #000; color: #fff; text-align: center; }
+        #gamesContainer { display: flex; flex-direction: column; gap: 20px; padding: 20px; }
+        .gameCard { background: #111; padding: 20px; border-radius: 12px; box-shadow: 0 0 10px rgba(255, 255, 255, 0.2); }
+        .gameCard h2 { color: #4b9bff; }
+        a { color: #7a5cff; text-decoration: none; }
     </style>
 </head>
-
 <body>
-    <h1><a href="https://lakepolar.github.io" style="color: #3b82f6; text-decoration: none;">lakepolar.github.io</a></h1>
-
-    <h2>Roblox Group Game Viewer</h2>
-
-    <input type="text" id="groupId" placeholder="Enter Group ID" value="3959677">
+    <h1>Roblox Group Game Viewer</h1>
+    <input type="text" id="groupIdInput" placeholder="Enter Group ID">
     <button onclick="fetchGames()">Fetch Games</button>
-
-    <p id="status">Enter a group ID and click 'Fetch Games'.</p>
-
-    <div id="gameList"></div>
-
-    <p class="footer">This site is not made or affiliated with Roblox Corporation. It is for viewing Roblox group games.</p>
-
+    <div id="gamesContainer">No games found for this group.</div>
 
     <script>
         async function fetchGames() {
-            const groupId = document.getElementById("groupId").value;
-            const status = document.getElementById("status");
-            const gameList = document.getElementById("gameList");
-
-            status.textContent = "Fetching games...";
-            gameList.innerHTML = "";
+            const groupId = document.getElementById('groupIdInput').value;
+            const container = document.getElementById('gamesContainer');
+            container.innerHTML = 'Loading...';
 
             try {
                 const response = await fetch(`https://mskswokcev.devrahsanko.workers.dev/?groupId=${groupId}`);
-                if (!response.ok) throw new Error("Failed to fetch games.");
+                if (!response.ok) throw new Error('Failed to fetch data');
 
-                const games = await response.json();
+                const data = await response.json();
+                const games = data.games || [];
 
-                if (!games.length) {
-                    status.textContent = "No games found for this group.";
+                if (games.length === 0) {
+                    container.innerHTML = 'No games found for this group.';
                     return;
                 }
 
-                status.textContent = "Games fetched successfully.";
+                container.innerHTML = '';
 
                 games.forEach(game => {
-                    const card = document.createElement("div");
-                    card.className = "game-card";
+                    const { name, description, rootPlaceId } = game;
+
+                    const card = document.createElement('div');
+                    card.className = 'gameCard';
+
                     card.innerHTML = `
-                        <h3>${game.name}</h3>
-                        <p><strong>Description:</strong> ${game.description || "No description available."}</p>
-                        <a href="https://www.roblox.com/games/${game.placeId}" target="_blank">Play Game</a>
+                        <h2>${name}</h2>
+                        <p><strong>Description:</strong> ${description || 'No description available.'}</p>
+                        <a href="https://www.roblox.com/games/${rootPlaceId}" target="_blank">Play Game</a>
                     `;
-                    gameList.appendChild(card);
+
+                    container.appendChild(card);
                 });
+
             } catch (error) {
-                status.textContent = "Error fetching games. Try again later.";
+                console.error('Error fetching games:', error);
+                container.innerHTML = 'Error loading games. Please try again later.';
             }
         }
+
+        // Auto-fetch on page load
+        window.onload = fetchGames;
     </script>
 </body>
-
 </html>
