@@ -69,64 +69,66 @@
     <div class="header">Roblox Developer Products Viewer</div>
 
     <div class="container">
-        <button class="button" onclick="startBypass()">Start Bypass</button>
+        <a class="button" onclick="fetchDevProducts(3317771874)">Show Products for Universe 3317771874</a>
+        <a class="button" onclick="fetchDevProducts(6401952734)">Show Products for Universe 6401952734</a>
+
         <div id="output"></div>
     </div>
 
     <div class="footer">
         <div>Created with ❤️ by Lake</div>
         <div class="special-thanks">
-            <span class="thanks-badge">Fuglen</span>
-            <span class="thanks-badge">LakePolar</span>
-            <span class="thanks-badge">Megan01Life</span>
+            <span class="thanks-badge">My Friends [Cupsy,Dog,Vitya,MaxNebulaYT,JustMeZ,Alex etc..]</span>
         </div>
     </div>
 
     <script>
-        const proxyUrl = 'https://mskswokcev.devrahsanko.workers.dev/';
-        const universeToGameIds = {
-            3317771874: [6839173394, 6401952734],
-            6401952734: [13451391992, 10338606269]
-        };
+        async function fetchDevProducts(universeId) {
+            const output = document.getElementById('output');
+            output.innerHTML = `Fetching Developer Products for Universe ${universeId}...`;
 
-        const randomHeaders = [
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0'
-        ];
+            // Randomized headers to help bypass restrictions
+            const headersList = [
+                { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' },
+                { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36' },
+                { 'User-Agent': 'Mozilla/5.0 (Linux; Android 10; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36' }
+            ];
 
-        async function startBypass() {
-            for (const universeId in universeToGameIds) {
-                const gameIds = universeToGameIds[universeId];
-                for (const gameId of gameIds) {
-                    await fetchProducts(universeId, gameId);
-                    await randomDelay();
+            const randomHeader = headersList[Math.floor(Math.random() * headersList.length)];
+
+            // Convert Universe ID to Game ID for better bypass
+            async function getGameId(universeId) {
+                try {
+                    const res = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`);
+                    const json = await res.json();
+                    return json.data[0]?.id || universeId;
+                } catch (error) {
+                    console.error('Failed to fetch Game ID:', error);
+                    return universeId;
                 }
             }
-        }
 
-        async function fetchProducts(universeId, gameId) {
-            const output = document.getElementById('output');
-            output.innerHTML += `<p>Fetching products for Universe ${universeId} (Game ${gameId})...</p>`;
+            const gameId = await getGameId(universeId);
 
             try {
-                const response = await fetch(`${proxyUrl}https://apis.roblox.com/developer-products/v1/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000`, {
-                    headers: {
-                        'User-Agent': randomHeaders[Math.floor(Math.random() * randomHeaders.length)],
-                        'Referer': `https://www.roblox.com/games/${gameId}`
-                    }
+                const url = `https://mskswokcev.devrahsanko.workers.dev/?url=https://apis.roblox.com/developer-products/v1/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000&gameId=${gameId}`;
+
+                const response = await fetch(url, {
+                    headers: randomHeader,
+                    method: 'GET',
+                    cache: 'no-store',
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}`);
-                }
+                if (!response.ok) throw new Error('Failed to fetch');
 
                 const data = await response.json();
 
                 if (data.length === 0) {
-                    output.innerHTML += `<p>No products found for Universe ${universeId}.</p>`;
+                    output.innerHTML = 'No Developer Products found.';
                     return;
                 }
+
+                output.innerHTML = `<h2>Developer Products for Universe ${universeId}:</h2>`;
 
                 data.forEach(product => {
                     output.innerHTML += `
@@ -140,12 +142,9 @@
                 });
 
             } catch (error) {
-                output.innerHTML += `<p>Error fetching products: ${error.message}</p>`;
+                output.innerHTML = 'Error fetching Developer Products.';
+                console.error(error);
             }
-        }
-
-        function randomDelay() {
-            return new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1000));
         }
     </script>
 
