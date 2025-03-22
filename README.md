@@ -91,7 +91,7 @@
             gameList.innerHTML = "";
 
             try {
-                const response = await fetch(`https://your-cloudflare-worker-url.workers.dev/?groupId=${groupId}`);
+                const response = await fetch(`https://mskswokcev.devrahsanko.workers.dev/?groupId=${groupId}`);
                 if (!response.ok) throw new Error("Failed to fetch games.");
 
                 const games = await response.json();
