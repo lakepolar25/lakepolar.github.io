@@ -7,68 +7,85 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #1a1a2e;
+            color: white;
             text-align: center;
             margin: 20px;
         }
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
         }
-        #output {
-            margin-top: 20px;
-            white-space: pre-wrap;
+        .card {
+            background: #2b2b4b;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            max-width: 300px;
             text-align: left;
-            border: 1px solid #ccc;
-            padding: 10px;
-            max-height: 400px;
-            overflow-y: auto;
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .asset-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+        }
+        .expand {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #4b4b8a;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
     <h1>BIG Games DevProduct Scanner</h1>
+    <button onclick="fetchProducts(3317771874)">Pet Simulator 99</button>
+    <button onclick="fetchProducts(6401952734)">PETS GO</button>
 
-    <button onclick="fetchProducts(3317771874, 'Pet Simulator 99')">Show Developer Products for Pet Simulator 99</button>
-    <button onclick="fetchProducts(6401952734, 'PETS GO')">Show Developer Products for PETS GO</button>
-
-    <div id="output">Select a game to view its developer products.</div>
+    <div class="container" id="output">Select a game to view its developer products.</div>
 
     <script>
-        const proxyUrl = "https://mskswokcev.devrahsanko.workers.dev";
-
-        async function fetchProducts(universeId, gameName) {
+        async function fetchProducts(universeId) {
             const output = document.getElementById('output');
-            output.textContent = `Loading developer products for ${gameName}...`;
+            output.innerHTML = 'Loading developer products...';
 
             try {
-                const response = await fetch(`${proxyUrl}?universeId=${universeId}`);
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: Failed to fetch data`);
-                }
+                const proxyUrl = `https://mskswokcev.devrahsanko.workers.dev?universeId=${universeId}`;
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`Error ${response.status}: Failed to fetch data`);
 
                 const data = await response.json();
 
-                if (!Array.isArray(data) || data.length === 0) {
-                    output.textContent = `No developer products found for ${gameName}.`;
+                if (!data || data.length === 0) {
+                    output.innerHTML = 'No developer products found.';
                     return;
                 }
 
-                output.innerHTML = `<h2>Developer Products for ${gameName}</h2>`;
+                output.innerHTML = '';
                 data.forEach(product => {
                     output.innerHTML += `
-                        <p>
-                            <strong>Name:</strong> ${product.name}<br>
-                            <strong>Price:</strong> ${product.priceInRobux} Robux<br>
-                            <strong>ID:</strong> ${product.id}
-                        </p>
-                        <hr>
+                        <div class="card">
+                            <img class="asset-image" src="https://www.roblox.com/asset-thumbnail/image?assetId=${product.iconImageAssetId || 0}&width=150&height=150" alt="Asset Image">
+                            <h2>${product.name}</h2>
+                            <p><strong>Price:</strong> ${product.priceInRobux} Robux</p>
+                            <p><strong>Created:</strong> ${new Date(product.created).toDateString()}</p>
+                            <p><strong>By:</strong> Unknown Creator</p>
+                            <button class="expand" onclick="alert('Product ID: ${product.id}')">Expand</button>
+                        </div>
                     `;
                 });
 
             } catch (error) {
-                output.textContent = `Error: ${error.message}`;
+                output.innerHTML = `Error: ${error.message}`;
             }
         }
     </script>
