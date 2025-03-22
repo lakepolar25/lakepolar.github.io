@@ -55,7 +55,6 @@
             justify-content: center;
             gap: 10px;
             margin-top: 20px;
-            flex-wrap: wrap;
         }
         .thanks-badge {
             padding: 10px 20px;
@@ -96,7 +95,7 @@
             output.innerHTML = `Fetching Developer Products for Universe ${universeId}...`;
 
             try {
-                const response = await fetch(`https://apis.roblox.com/developer-products/v1/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000`);
+                const response = await fetch(`https://mskswokcev.devrahsanko.workers.dev/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000`);
                 if (!response.ok) throw new Error("Failed to fetch");
 
                 const data = await response.json();
