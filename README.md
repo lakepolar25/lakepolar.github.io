@@ -1,111 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Roblox Group Game Viewer</title>
-  <style>
-    body {
-      background-color: #121212;
-      color: white;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      color: #4285f4;
-    }
-    input, button {
-      margin: 10px;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    input {
-      width: 200px;
-    }
-    button {
-      background-color: #800080;
-      color: white;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #9a4a9a;
-    }
-    .game-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 20px;
-    }
-    .game-card {
-      background: #1e1e1e;
-      border-radius: 10px;
-      padding: 15px;
-      width: 250px;
-    }
-    .game-card img {
-      width: 100%;
-      border-radius: 10px;
-    }
-    .footer {
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Roblox Group Game Viewer</h1>
-  <input type="text" id="groupId" placeholder="Enter Group ID">
-  <button onclick="fetchGames()">Fetch Games</button>
-  <p id="errorMessage"></p>
-
-  <div class="game-container" id="gameContainer"></div>
-
-  <div class="footer">
-    <p>This site is not affiliated with Roblox Corporation. It is for viewing Roblox group games.</p>
-    <button onclick="window.open('https://discord.gg/B2rqHKTJkC', '_blank')">Discord</button>
-    <button onclick="window.open('https://twitter.com/AstroLeaksT', '_blank')">Twitter</button>
-  </div>
-
-  <script>
-    async function fetchGames() {
-      const groupId = document.getElementById('groupId').value;
-      const errorMessage = document.getElementById('errorMessage');
-      const gameContainer = document.getElementById('gameContainer');
-      errorMessage.textContent = '';
-      gameContainer.innerHTML = '';
-
-      try {
-        const response = await fetch(`https://mskswokcev.devrahsanko.workers.dev/?groupId=${groupId}`);
-        const data = await response.json();
-
-        if (!response.ok) throw new Error("Failed to fetch games");
-
-        if (!data || data.length === 0) {
-          errorMessage.textContent = 'No games found for this group.';
-          return;
+    <meta charset="UTF-8">
+    <title>Roblox Group Game Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            padding: 20px;
         }
 
-        data.forEach(game => {
-          const gameCard = document.createElement('div');
-          gameCard.className = 'game-card';
+        h1 {
+            color: #3b82f6;
+        }
 
-          gameCard.innerHTML = `
-            <img src="${game.icon || 'https://via.placeholder.com/150'}" alt="${game.name}">
-            <h3>${game.name}</h3>
-            <p>Visits: ${game.visits.toLocaleString()}</p>
-            <p>Created: ${new Date(game.created).toDateString()}</p>
-            <button onclick="window.open('https://www.roblox.com/games/${game.id}', '_blank')">Play Game</button>
-          `;
-          gameContainer.appendChild(gameCard);
-        });
-      } catch (error) {
-        errorMessage.textContent = 'Error fetching games. Try again later.';
-        console.error('Error:', error);
-      }
-    }
-  </script>
+        input {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #6b21a8;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #8b5cf6;
+        }
+
+        .footer {
+            margin-top: 20px;
+        }
+
+        .social-button {
+            margin: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #6b21a8;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .game-card {
+            border: 1px solid #6b21a8;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px auto;
+            max-width: 500px;
+            background-color: #1e1e1e;
+        }
+    </style>
+</head>
+
+<body>
+    <h1><a href="https://lakepolar.github.io" style="color: #3b82f6; text-decoration: none;">lakepolar.github.io</a></h1>
+
+    <h2>Roblox Group Game Viewer</h2>
+
+    <input type="text" id="groupId" placeholder="Enter Group ID" value="3959677">
+    <button onclick="fetchGames()">Fetch Games</button>
+
+    <p id="status">Enter a group ID and click 'Fetch Games'.</p>
+
+    <div id="gameList"></div>
+
+    <p class="footer">This site is not made or affiliated with Roblox Corporation. It is for viewing Roblox group games.</p>
+
+    <a href="#" class="social-button">🎮 Discord</a>
+    <a href="#" class="social-button">🐦 Twitter</a>
+
+    <script>
+        async function fetchGames() {
+            const groupId = document.getElementById("groupId").value;
+            const status = document.getElementById("status");
+            const gameList = document.getElementById("gameList");
+
+            status.textContent = "Fetching games...";
+            gameList.innerHTML = "";
+
+            try {
+                const response = await fetch(`https://mskswokcev.devrahsanko.workers.dev?groupId=${groupId}`);
+                if (!response.ok) throw new Error("Failed to fetch games.");
+
+                const games = await response.json();
+
+                if (!games.length) {
+                    status.textContent = "No games found for this group.";
+                    return;
+                }
+
+                status.textContent = "Games fetched successfully.";
+
+                games.forEach(game => {
+                    const card = document.createElement("div");
+                    card.className = "game-card";
+                    card.innerHTML = `
+                        <h3>${game.name}</h3>
+                        <p><strong>Description:</strong> ${game.description || "No description available."}</p>
+                        <p><strong>Visits:</strong> ${game.visits.toLocaleString()}</p>
+                        <p><strong>Status:</strong> ${game.status || "Unknown"}</p>
+                        <p><strong>Creation Date:</strong> ${new Date(game.created).toLocaleDateString()}</p>
+                        <a href="https://www.roblox.com/games/${game.placeId}" target="_blank">Play Game</a>
+                    `;
+                    gameList.appendChild(card);
+                });
+            } catch (error) {
+                status.textContent = "Error fetching games. Try again later.";
+            }
+        }
+    </script>
 </body>
+
 </html>
