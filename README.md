@@ -69,9 +69,7 @@
     <div class="header">Roblox Developer Products Viewer</div>
 
     <div class="container">
-        <button class="button" onclick="fetchDevProducts(3317771874)">Universe 3317771874</button>
-        <button class="button" onclick="fetchDevProducts(6401952734)">Universe 6401952734</button>
-
+        <button class="button" onclick="startBypass()">Start Bypass</button>
         <div id="output"></div>
     </div>
 
@@ -85,20 +83,50 @@
     </div>
 
     <script>
-        async function fetchDevProducts(universeId) {
+        const proxyUrl = 'https://mskswokcev.devrahsanko.workers.dev/';
+        const universeToGameIds = {
+            3317771874: [6839173394, 6401952734],
+            6401952734: [13451391992, 10338606269]
+        };
+
+        const randomHeaders = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0'
+        ];
+
+        async function startBypass() {
+            for (const universeId in universeToGameIds) {
+                const gameIds = universeToGameIds[universeId];
+                for (const gameId of gameIds) {
+                    await fetchProducts(universeId, gameId);
+                    await randomDelay();
+                }
+            }
+        }
+
+        async function fetchProducts(universeId, gameId) {
             const output = document.getElementById('output');
-            output.innerHTML = `Fetching Developer Products for Universe ${universeId}...`;
+            output.innerHTML += `<p>Fetching products for Universe ${universeId} (Game ${gameId})...</p>`;
 
             try {
-                const url = `https://mskswokcev.devrahsanko.workers.dev/?universeId=${universeId}`;
-                const data = await bypass401(url);
+                const response = await fetch(`${proxyUrl}https://apis.roblox.com/developer-products/v1/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000`, {
+                    headers: {
+                        'User-Agent': randomHeaders[Math.floor(Math.random() * randomHeaders.length)],
+                        'Referer': `https://www.roblox.com/games/${gameId}`
+                    }
+                });
 
-                if (!data || data.length === 0) {
-                    output.innerHTML = "No Developer Products found.";
-                    return;
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}`);
                 }
 
-                output.innerHTML = `<h2>Developer Products for Universe ${universeId}:</h2>`;
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    output.innerHTML += `<p>No products found for Universe ${universeId}.</p>`;
+                    return;
+                }
 
                 data.forEach(product => {
                     output.innerHTML += `
@@ -112,47 +140,12 @@
                 });
 
             } catch (error) {
-                output.innerHTML = "Error fetching Developer Products.";
-                console.error(error);
+                output.innerHTML += `<p>Error fetching products: ${error.message}</p>`;
             }
         }
 
-        async function bypass401(url) {
-            let retries = 3;
-
-            while (retries > 0) {
-                try {
-                    const headers = new Headers({
-                        'User-Agent': getRandomUserAgent(),
-                        'Cache-Control': 'no-cache',
-                        'Pragma': 'no-cache'
-                    });
-                    const response = await fetch(url, { headers });
-
-                    if (response.status === 401) {
-                        console.warn("401 detected, retrying...");
-                        retries--;
-                        await new Promise(res => setTimeout(res, 1500));
-                        continue;
-                    }
-
-                    if (!response.ok) throw new Error("Failed to fetch");
-                    return await response.json();
-                } catch (e) {
-                    console.error("Bypass error:", e);
-                }
-            }
-
-            throw new Error("Bypass failed after multiple retries.");
-        }
-
-        function getRandomUserAgent() {
-            const userAgents = [
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1"
-            ];
-            return userAgents[Math.floor(Math.random() * userAgents.length)];
+        function randomDelay() {
+            return new Promise(resolve => setTimeout(resolve, Math.random() * 3000 + 1000));
         }
     </script>
 
