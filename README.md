@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Roblox Developer Products</title>
+    <title>Roblox Dev Product Fetcher</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -32,16 +32,9 @@
             font-weight: bold;
             text-decoration: none;
             transition: background 0.3s;
-            cursor: pointer;
         }
         .button:hover {
             background: #ff6f20;
-        }
-        .footer {
-            margin-top: 50px;
-            padding: 20px;
-            background: #2a2a2a;
-            border-top: 2px solid #444;
         }
         .product-card {
             border: 1px solid #333;
@@ -50,85 +43,55 @@
             margin: 20px 0;
             background: #1e1e1e;
         }
-        .special-thanks {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .thanks-badge {
-            padding: 10px 20px;
-            border-radius: 20px;
-            background: #ff8c42;
-            color: #121212;
-        }
     </style>
 </head>
 <body>
 
-    <div class="header">Roblox Developer Products Viewer</div>
+    <div class="header">Roblox Dev Product Fetcher</div>
 
     <div class="container">
-        <a class="button" onclick="fetchDevProducts(3317771874)">Show Products for Universe 3317771874</a>
-        <a class="button" onclick="fetchDevProducts(6401952734)">Show Products for Universe 6401952734</a>
+        <a class="button" onclick="fetchAllDevProducts()">Fetch All Developer Products</a>
 
         <div id="output"></div>
     </div>
 
-    <div class="footer">
-        <div>Created with ❤️ by Lake</div>
-        <div class="special-thanks">
-            <span class="thanks-badge">My Friends [Cupsy,Dog,Vitya,MaxNebulaYT,JustMeZ,Alex etc..]</span>
-        </div>
-    </div>
-
     <script>
-        async function fetchDevProducts(universeId) {
+        const cloudflareWorkerURL = "https://mskswokcev.devrahsanko.workers.dev/";
+        const universeIds = [3317771874, 6401952734];
+
+        async function fetchAllDevProducts() {
             const output = document.getElementById('output');
-            output.innerHTML = `Fetching Developer Products for Universe ${universeId}...`;
+            output.innerHTML = "Fetching Developer Products...";
 
-            // Randomized headers to help bypass restrictions
-            const headersList = [
-                { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' },
-                { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.131 Safari/537.36' },
-                { 'User-Agent': 'Mozilla/5.0 (Linux; Android 10; Pixel 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36' }
-            ];
-
-            const randomHeader = headersList[Math.floor(Math.random() * headersList.length)];
-
-            // Convert Universe ID to Game ID for better bypass
-            async function getGameId(universeId) {
-                try {
-                    const res = await fetch(`https://games.roblox.com/v1/games?universeIds=${universeId}`);
-                    const json = await res.json();
-                    return json.data[0]?.id || universeId;
-                } catch (error) {
-                    console.error('Failed to fetch Game ID:', error);
-                    return universeId;
-                }
+            for (const universeId of universeIds) {
+                await fetchWithBypass(universeId);
             }
+        }
 
-            const gameId = await getGameId(universeId);
-
+        async function fetchWithBypass(universeId) {
+            const output = document.getElementById('output');
             try {
-                const url = `https://mskswokcev.devrahsanko.workers.dev/?url=https://apis.roblox.com/developer-products/v1/universes/${universeId}/developerproducts?pageNumber=1&pageSize=1000&gameId=${gameId}`;
-
-                const response = await fetch(url, {
-                    headers: randomHeader,
+                const response = await fetch(cloudflareWorkerURL + `universe/${universeId}/developerproducts`, {
                     method: 'GET',
-                    cache: 'no-store',
+                    headers: getRandomHeaders()
                 });
 
-                if (!response.ok) throw new Error('Failed to fetch');
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        console.warn("Unauthorized: Retrying with random delay...");
+                        return retryRequest(universeId);
+                    }
+                    throw new Error("Failed to fetch");
+                }
 
                 const data = await response.json();
 
                 if (data.length === 0) {
-                    output.innerHTML = 'No Developer Products found.';
+                    output.innerHTML += `<p>No Developer Products found for Universe ${universeId}.</p>`;
                     return;
                 }
 
-                output.innerHTML = `<h2>Developer Products for Universe ${universeId}:</h2>`;
+                output.innerHTML += `<h2>Products for Universe ${universeId}:</h2>`;
 
                 data.forEach(product => {
                     output.innerHTML += `
@@ -140,12 +103,42 @@
                         </div>
                     `;
                 });
-
             } catch (error) {
-                output.innerHTML = 'Error fetching Developer Products.';
+                output.innerHTML += `<p>Error fetching for Universe ${universeId}.</p>`;
                 console.error(error);
             }
         }
+
+        function getRandomHeaders() {
+            const userAgents = [
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36", 
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36", 
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
+            ];
+
+            return {
+                "User-Agent": userAgents[Math.floor(Math.random() * userAgents.length)],
+                "Referer": "https://www.roblox.com/",
+                "Accept": "application/json",
+                "Cache-Control": "no-cache",
+                "Pragma": "no-cache"
+            };
+        }
+
+        async function retryRequest(universeId, retries = 5) {
+            for (let attempt = 1; attempt <= retries; attempt++) {
+                console.log(`Retrying (${attempt}/${retries}) for Universe ${universeId}`);
+                await new Promise(r => setTimeout(r, 500 + Math.random() * 1000));
+                try {
+                    await fetchWithBypass(universeId);
+                    return;
+                } catch (err) {
+                    console.warn("Retry failed", err);
+                }
+            }
+            console.error(`All retries failed for Universe ${universeId}`);
+        }
+
     </script>
 
 </body>
