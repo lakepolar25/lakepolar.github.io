@@ -1,103 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Roblox Group Games Viewer</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: white;
-            text-align: center;
-            padding-top: 50px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        input {
-            padding: 10px;
-            width: 300px;
-            margin-bottom: 20px;
-            border: none;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #ff7f50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .game-card {
-            border: 1px solid #ff7f50;
-            padding: 10px;
-            margin: 10px;
-            border-radius: 8px;
-            background-color: #1e1e1e;
-        }
-        a {
-            color: #ff7f50;
-            text-decoration: none;
-        }
-        footer {
-            margin-top: 50px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roblox Group Game Viewer</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2em;
+    }
+    input {
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      margin: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #8a2be2; /* Purple */
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #6a1bbd;
+    }
+    .game-card {
+      border: 1px solid #444;
+      border-radius: 8px;
+      margin: 10px;
+      padding: 15px;
+      display: inline-block;
+      width: 250px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    .footer {
+      margin-top: 20px;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Roblox Group Games Viewer</h1>
-        <input id="groupIdInput" type="text" placeholder="Enter Group ID" />
-        <button onclick="fetchGames()">Show Group Games</button>
-        <div id="gamesContainer"></div>
-        <footer>
-            Created with ❤️ by Lake
-        </footer>
-    </div>
+  <h1>Roblox Group Game Viewer</h1>
 
-    <script>
-        async function fetchGames() {
-            const groupId = document.getElementById('groupIdInput').value.trim();
-            if (!groupId) {
-                alert("Please enter a valid Group ID.");
-                return;
-            }
+  <input type="text" id="groupId" placeholder="Enter Roblox Group ID" />
+  <button onclick="fetchGames()">View Games</button>
 
-            const apiUrl = `https://games.roblox.com/v2/groups/${groupId}/gamesV2?accessFilter=1&limit=100&sortOrder=Asc`;
+  <div id="gameContainer"></div>
 
-            try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) throw new Error("Failed to fetch games.");
+  <div class="footer">
+    <p>This site is not made or affiliated with Roblox Corporation.<br> This site is made to view games from a Roblox group.</p>
+    <a href="#" style="text-decoration: none; color: white;">
+      <button>Discord</button>
+    </a>
+    <a href="#" style="text-decoration: none; color: white;">
+      <button>Twitter</button>
+    </a>
+  </div>
 
-                const data = await response.json();
-                displayGames(data.data);
-            } catch (error) {
-                document.getElementById('gamesContainer').innerHTML = `<p>Error: ${error.message}</p>`;
-            }
+  <script>
+    async function fetchGames() {
+      const groupId = document.getElementById('groupId').value;
+      if (!groupId) {
+        alert('Please enter a Roblox Group ID.');
+        return;
+      }
+
+      const workerUrl = 'https://https://mskswokcev.devrahsanko.workers.dev/?groupId=' + groupId;
+
+      try {
+        const response = await fetch(workerUrl);
+        const data = await response.json();
+
+        const gameContainer = document.getElementById('gameContainer');
+        gameContainer.innerHTML = '';
+
+        if (data.data && data.data.length > 0) {
+          data.data.forEach(game => {
+            const gameCard = document.createElement('div');
+            gameCard.className = 'game-card';
+            gameCard.innerHTML = `
+              <h3>${game.name}</h3>
+              <img src="${game.thumbnailUrl || 'https://via.placeholder.com/150'}" alt="Game Thumbnail" width="200">
+              <p>Players: ${game.playing}</p>
+              <a href="https://www.roblox.com/games/${game.rootPlaceId}" target="_blank">
+                <button>Play Game</button>
+              </a>
+            `;
+            gameContainer.appendChild(gameCard);
+          });
+        } else {
+          gameContainer.innerHTML = '<p>No games found for this group.</p>';
         }
-
-        function displayGames(games) {
-            const container = document.getElementById('gamesContainer');
-            container.innerHTML = "";
-
-            if (games.length === 0) {
-                container.innerHTML = "<p>No games found for this group.</p>";
-                return;
-            }
-
-            games.forEach(game => {
-                const gameCard = document.createElement('div');
-                gameCard.className = 'game-card';
-                gameCard.innerHTML = `
-                    <h2>${game.name}</h2>
-                    <p>Players: ${game.playing}</p>
-                    <a href="https://www.roblox.com/games/${game.rootPlaceId}" target="_blank">Play Game</a>
-                `;
-                container.appendChild(gameCard);
-            });
-        }
-    </script>
+      } catch (error) {
+        console.error('Error fetching games:', error);
+        document.getElementById('gameContainer').innerHTML = '<p>Error fetching games. Check the group ID and try again.</p>';
+      }
+    }
+  </script>
 </body>
 </html>
