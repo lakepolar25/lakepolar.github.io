@@ -1,93 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>BIG Games DevProduct Scanner</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Products Viewer</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a2e;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background-color: #151425;
             color: white;
-            text-align: center;
-            margin: 20px;
-        }
-        .container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
-        .card {
-            background: #2b2b4b;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
             padding: 20px;
-            max-width: 300px;
-            text-align: left;
-            transition: transform 0.3s;
+            box-sizing: border-box;
         }
-        .card:hover {
-            transform: scale(1.05);
+
+        .product-card {
+            background: #1c1b2f;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
         }
-        .asset-image {
-            width: 100px;
-            height: 100px;
-            border-radius: 8px;
+
+        .product-card:hover {
+            transform: translateY(-5px);
         }
-        .expand {
-            margin-top: 10px;
-            padding: 8px 16px;
-            background: #4b4b8a;
-            border: none;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
+
+        .product-name {
+            font-size: 1.5rem;
+            color: #ff79c6;
+        }
+
+        .product-price {
+            font-size: 1.2rem;
+            color: #8be9fd;
+        }
+
+        .product-creator {
+            font-size: 1rem;
+            color: #bd93f9;
+        }
+
+        .product-date {
+            font-size: 0.9rem;
+            color: #6272a4;
         }
     </style>
 </head>
 <body>
-    <h1>BIG Games DevProduct Scanner</h1>
-    <button onclick="fetchProducts(3317771874)">Pet Simulator 99</button>
-    <button onclick="fetchProducts(6401952734)">PETS GO</button>
-
-    <div class="container" id="output">Select a game to view its developer products.</div>
+    <div class="container" id="product-container"></div>
 
     <script>
-        async function fetchProducts(universeId) {
-            const output = document.getElementById('output');
-            output.innerHTML = 'Loading developer products...';
-
+        async function fetchDeveloperProducts() {
             try {
-                const proxyUrl = `https://mskswokcev.devrahsanko.workers.dev?universeId=${universeId}`;
-                const response = await fetch(proxyUrl);
-                if (!response.ok) throw new Error(`Error ${response.status}: Failed to fetch data`);
-
+                const response = await fetch('https://mskswokcev.devrahsanko.workers.dev');
                 const data = await response.json();
 
-                if (!data || data.length === 0) {
-                    output.innerHTML = 'No developer products found.';
-                    return;
-                }
+                const container = document.getElementById('product-container');
 
-                output.innerHTML = '';
                 data.forEach(product => {
-                    output.innerHTML += `
-                        <div class="card">
-                            <img class="asset-image" src="https://www.roblox.com/asset-thumbnail/image?assetId=${product.iconImageAssetId || 0}&width=150&height=150" alt="Asset Image">
-                            <h2>${product.name}</h2>
-                            <p><strong>Price:</strong> ${product.priceInRobux} Robux</p>
-                            <p><strong>Created:</strong> ${new Date(product.created).toDateString()}</p>
-                            <p><strong>By:</strong> Unknown Creator</p>
-                            <button class="expand" onclick="alert('Product ID: ${product.id}')">Expand</button>
-                        </div>
-                    `;
-                });
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
 
+                    card.innerHTML = `
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">${product.priceInRobux || 0} Robux</div>
+                        <div class="product-creator">By: ${product.creator || 'Unknown'}</div>
+                        <div class="product-date">Created: ${new Date(product.created).toLocaleDateString()}</div>
+                    `;
+
+                    container.appendChild(card);
+                });
             } catch (error) {
-                output.innerHTML = `Error: ${error.message}`;
+                console.error('Error fetching developer products:', error);
             }
         }
+
+        fetchDeveloperProducts();
     </script>
 </body>
 </html>
