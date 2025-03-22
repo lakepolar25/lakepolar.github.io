@@ -20,31 +20,27 @@
             margin-top: 20px;
             white-space: pre-wrap;
             text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
         }
     </style>
 </head>
 <body>
     <h1>BIG Games DevProduct Scanner</h1>
 
-    <button onclick="fetchProducts(3317771874)">Show Developer Products for Pet Simulator 99</button>
-    <button onclick="fetchProducts(6401952734)">Show Developer Products for PETS GO</button>
+    <button onclick="fetchProducts(3317771874)">Pet Simulator 99</button>
+    <button onclick="fetchProducts(6401952734)">PETS GO</button>
 
     <div id="output">Select a game to view its developer products.</div>
 
     <script>
-        // Replace with your Cloudflare Worker URL
-        const proxyUrl = "https://mskswokcev.devrahsanko.workers.dev";
-
         async function fetchProducts(universeId) {
             const output = document.getElementById('output');
             output.textContent = 'Loading developer products...';
 
             try {
-                const response = await fetch(`${proxyUrl}?universeId=${universeId}`);
-                
+                // Replace YOUR_WORKER_URL with your Cloudflare Worker URL
+                const workerUrl = `https://mskswokcev.devrahsanko.workers.dev?universeId=${universeId}`;
+                const response = await fetch(workerUrl);
+
                 if (!response.ok) {
                     throw new Error(`Error ${response.status}: Failed to fetch data`);
                 }
@@ -61,7 +57,7 @@
                     output.innerHTML += `
                         <p>
                             <strong>Name:</strong> ${product.name}<br>
-                            <strong>Price:</strong> ${product.priceInRobux} Robux<br>
+                            <strong>Price:</strong> ${product.priceInRobux || 'N/A'} Robux<br>
                             <strong>ID:</strong> ${product.id}
                         </p>
                         <hr>
