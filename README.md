@@ -70,7 +70,7 @@
       gameContainer.innerHTML = 'Loading games...';
 
       try {
-        const response = await fetch(`https://your-cloudflare-worker-url.workers.dev/?groupId=${groupId}`);
+        const response = await fetch(`https://mskswokcev.devrahsanko.workers.dev/?groupId=${groupId}`);
         const data = await response.json();
 
         if (!data || !data.data || data.data.length === 0) {
