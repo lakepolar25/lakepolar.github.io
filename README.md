@@ -78,8 +78,6 @@
 
     <p class="footer">This site is not made or affiliated with Roblox Corporation. It is for viewing Roblox group games.</p>
 
-    <a href="#" class="social-button">🎮 Discord</a>
-    <a href="#" class="social-button">🐦 Twitter</a>
 
     <script>
         async function fetchGames() {
@@ -108,6 +106,7 @@
                     card.className = "game-card";
                     card.innerHTML = `
                         <h3>${game.name}</h3>
+                        <p><strong>Description:</strong> ${game.description || "No description available."}</p>
                         <a href="https://www.roblox.com/games/${game.placeId}" target="_blank">Play Game</a>
                     `;
                     gameList.appendChild(card);
